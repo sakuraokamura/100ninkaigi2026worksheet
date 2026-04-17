@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>100人会議 事前ワーク提出フォーム</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans JP', 'Hiragino Sans', 'Yu Gothic', sans-serif;
+    background: #f5f5f2;
+    min-height: 100vh;
+    padding: 2rem 1rem 4rem;
+    color: #1a1a1a;
+  }
+
+  .form-wrap { max-width: 640px; margin: 0 auto; }
+
+  .form-header {
+    background: white;
+    border-radius: 12px;
+    border-top: 5px solid #1D9E75;
+    padding: 1.5rem 1.75rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+
+  .form-header h1 { font-size: 20px; font-weight: 700; line-height: 1.4; margin-bottom: 8px; }
+  .form-header p { font-size: 14px; color: #666; line-height: 1.6; }
+
+  .required-note { font-size: 13px; color: #666; margin-bottom: 1rem; padding-left: 4px; }
+  .required-note span { color: #D85A30; }
+
+  .card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.25rem 1.75rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+
+  .field label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  .req {
+    background: #FAECE7;
+    color: #D85A30;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+
+  .field input[type="text"],
+  .field input[type="email"] {
+    width: 100%;
+    height: 42px;
+    padding: 0 14px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    background: #fafafa;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+
+  .field input:focus {
+    outline: none;
+    border-color: #1D9E75;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(29,158,117,0.12);
+  }
+
+  .grade-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+
+  .grade-opt {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 9px 4px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    background: #fafafa;
+    transition: border-color 0.15s, background 0.15s;
+    user-select: none;
+  }
+
+  .grade-opt:hover { border-color: #1D9E75; background: #f0faf6; }
+  .grade-opt input[type="radio"] { accent-color: #1D9E75; width: 14px; height: 14px; flex-shrink: 0; }
+  .grade-opt.selected { border-color: #1D9E75; background: #e1f5ee; }
+
+  .venue-group { display: flex; gap: 12px; }
+
+  .venue-opt {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    background: #fafafa;
+    transition: border-color 0.15s, background 0.15s;
+    user-select: none;
+  }
+
+  .venue-opt:hover { border-color: #1D9E75; background: #f0faf6; }
+  .venue-opt input[type="radio"] { accent-color: #1D9E75; width: 16px; height: 16px; }
+  .venue-opt.selected { border-color: #1D9E75; background: #e1f5ee; }
+
+  .upload-area {
+    border: 2px dashed #ccc;
+    border-radius: 10px;
+    padding: 2rem 1rem;
+    text-align: center;
+    cursor: pointer;
+    background: #fafafa;
+    position: relative;
+    transition: border-color 0.15s, background 0.15s;
+  }
+
+  .upload-area:hover, .upload-area.dragover { border-color: #1D9E75; background: #f0faf6; }
+
+  .upload-area input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+  }
+
+  .upload-icon { font-size: 32px; margin-bottom: 8px; }
+  .upload-main { font-size: 14px; font-weight: 600; color: #1D9E75; margin-bottom: 4px; }
+  .upload-sub { font-size: 12px; color: #999; }
+  .file-name { margin-top: 10px; font-size: 13px; color: #1D9E75; font-weight: 600; display: none; }
+
+  .error-msg { font-size: 12px; color: #D85A30; margin-top: 6px; display: none; }
+  .has-error input { border-color: #D85A30 !important; background: #fff8f6 !important; }
+  .has-error .upload-area { border-color: #D85A30; }
+  .has-error .error-msg { display: block; }
+  .has-error-radio .error-msg { display: block; }
+
+  .submit-btn {
+    width: 100%;
+    height: 52px;
+    background: #1D9E75;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    margin-top: 1.5rem;
+    transition: background 0.15s, transform 0.1s;
+    box-shadow: 0 2px 8px rgba(29,158,117,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .submit-btn:hover { background: #0F6E56; }
+  .submit-btn:active { transform: scale(0.99); }
+  .submit-btn:disabled { background: #aaa; cursor: not-allowed; box-shadow: none; }
+
+  .spinner {
+    width: 20px; height: 20px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: none;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .sending .spinner { display: block; }
+  .sending .btn-text { display: none; }
+
+  .success-box {
+    display: none;
+    background: white;
+    border-radius: 12px;
+    padding: 3rem 2rem;
+    text-align: center;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+
+  .check-circle {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: #e1f5ee;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.25rem;
+  }
+
+  .success-box h2 { font-size: 20px; font-weight: 700; margin-bottom: 10px; }
+  .success-box p { font-size: 14px; color: #666; line-height: 1.7; }
+
+  /* ---- 設定バナー ---- */
+  .setup-banner {
+    background: #FFF8E1;
+    border: 1px solid #F9C75A;
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.25rem;
+    font-size: 13px;
+    color: #7a5f00;
+    line-height: 1.6;
+  }
+  .setup-banner strong { font-weight: 700; }
+  .setup-banner code {
+    background: #fff3cd;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 12px;
+    word-break: break-all;
+  }
+</style>
+</head>
+<body>
+
+<div class="form-wrap">
+
+  <!-- 設定バナー（SCRIPT_URLを設定するまで表示） -->
+  <div class="setup-banner" id="setup-banner">
+    ⚙️ <strong>管理者設定が必要です：</strong>
+    下記の手順でGoogle Apps ScriptのURLを取得し、このHTMLファイルの
+    <code>SCRIPT_URL</code> を書き換えてください。
+    設定が完了したらこのバナーは非表示にできます。
+    <br><br>
+    📋 <strong>手順：</strong>
+    ① <a href="https://script.google.com" target="_blank" style="color:#1D9E75;">script.google.com</a> でスクリプトを作成
+    → ② スクリプトをデプロイ（ウェブアプリ）
+    → ③ 発行されたURLをこのファイルの <code>SCRIPT_URL</code> に貼り付け
+    <br><br>
+    📄 Google Apps Scriptのコードは別ファイル <strong>gas_code.gs</strong> を参照してください。
+  </div>
+
+  <div class="form-header">
+    <h1>100人会議　事前ワーク提出フォーム</h1>
+    <p>すべての項目を入力の上、資料をアップロードしてご提出ください。</p>
+  </div>
+
+  <p class="required-note"><span>★ </span>すべての項目は必須です</p>
+
+  <div id="form-body">
+
+    <div class="card field" id="f-name">
+      <label>名前 <span class="req">必須</span></label>
+      <input type="text" id="name" placeholder="例：山田 太郎" />
+      <p class="error-msg">名前を入力してください</p>
+    </div>
+
+    <div class="card field" id="f-grade">
+      <label>学年 <span class="req">必須</span></label>
+      <div class="grade-grid">
+        <label class="grade-opt"><input type="radio" name="grade" value="B1"> B1</label>
+        <label class="grade-opt"><input type="radio" name="grade" value="B2"> B2</label>
+        <label class="grade-opt"><input type="radio" name="grade" value="B3"> B3</label>
+        <label class="grade-opt"><input type="radio" name="grade" value="B4"> B4</label>
+        <label class="grade-opt"><input type="radio" name="grade" value="M1"> M1</label>
+        <label class="grade-opt"><input type="radio" name="grade" value="M2"> M2</label>
+        <label class="grade-opt"><input type="radio" name="grade" value="D"> 博士</label>
+        <label class="grade-opt"><input type="radio" name="grade" value="other"> その他</label>
+      </div>
+      <p class="error-msg">学年を選択してください</p>
+    </div>
+
+    <div class="card field" id="f-univ">
+      <label>大学 <span class="req">必須</span></label>
+      <input type="text" id="univ" placeholder="例：〇〇大学" />
+      <p class="error-msg">大学名を入力してください</p>
+    </div>
+
+    <div class="card field" id="f-email">
+      <label>メールアドレス <span class="req">必須</span></label>
+      <input type="email" id="email" placeholder="例：example@mail.com" />
+      <p class="error-msg">正しいメールアドレスを入力してください</p>
+    </div>
+
+    <div class="card field" id="f-venue">
+      <label>参加会場 <span class="req">必須</span></label>
+      <div class="venue-group">
+        <label class="venue-opt"><input type="radio" name="venue" value="徳島"> 徳島</label>
+        <label class="venue-opt"><input type="radio" name="venue" value="仙台"> 仙台</label>
+      </div>
+      <p class="error-msg">参加会場を選択してください</p>
+    </div>
+
+    <div class="card field" id="f-file">
+      <label>資料アップロード <span class="req">必須</span></label>
+      <div class="upload-area" id="upload-area">
+        <input type="file" id="file-input" accept=".pdf,.ppt,.pptx,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg" />
+        <div class="upload-icon">📎</div>
+        <p class="upload-main">クリックしてファイルを選択</p>
+        <p class="upload-sub">またはここにドラッグ＆ドロップ</p>
+        <p class="upload-sub" style="margin-top:4px;">PDF / PowerPoint / Word / Excel / 画像</p>
+        <p class="file-name" id="file-name"></p>
+      </div>
+      <p class="error-msg">資料をアップロードしてください</p>
+    </div>
+
+    <button class="submit-btn" id="submit-btn" onclick="submitForm()">
+      <span class="spinner" id="spinner"></span>
+      <span class="btn-text">提出する</span>
+    </button>
+  </div>
+
+  <div class="success-box" id="success-box">
+    <div class="check-circle">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+        <path d="M7 16L13 22L25 10" stroke="#1D9E75" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <h2>提出が完了しました！</h2>
+    <p>ご提出ありがとうございます。<br>スプレッドシートへの記録が完了しました。</p>
+  </div>
+
+</div>
+
+<script>
+  // ============================================================
+  // ★ ここにGoogle Apps ScriptのデプロイURLを貼り付けてください
+  // ============================================================
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby-9osMGb-U_9e3XU-97KY73M1WMgb_T08aQyL1PhtbIJjL_Q_1FTCy5KoRTOjjoHa4YA/exec";
+  // ============================================================
+
+  if (SCRIPT_URL === "YOUR_SCRIPT_URL_HERE") {
+    document.getElementById("setup-banner").style.display = "block";
+  } else {
+    document.getElementById("setup-banner").style.display = "none";
+  }
+
+  // 学年ラジオ
+  document.querySelectorAll('.grade-opt').forEach(opt => {
+    opt.addEventListener('click', function() {
+      document.querySelectorAll('.grade-opt').forEach(o => o.classList.remove('selected'));
+      this.classList.add('selected');
+      document.getElementById('f-grade').classList.remove('has-error-radio');
+    });
+  });
+
+  // 会場ラジオ
+  document.querySelectorAll('.venue-opt').forEach(opt => {
+    opt.addEventListener('click', function() {
+      document.querySelectorAll('.venue-opt').forEach(o => o.classList.remove('selected'));
+      this.classList.add('selected');
+      document.getElementById('f-venue').classList.remove('has-error-radio');
+    });
+  });
+
+  // ドラッグ＆ドロップ
+  const ua = document.getElementById('upload-area');
+  ua.addEventListener('dragover', e => { e.preventDefault(); ua.classList.add('dragover'); });
+  ua.addEventListener('dragleave', () => ua.classList.remove('dragover'));
+  ua.addEventListener('drop', e => {
+    e.preventDefault();
+    ua.classList.remove('dragover');
+    const f = e.dataTransfer.files[0];
+    if (f) { document.getElementById('file-input').files = e.dataTransfer.files; showFileName(f.name); }
+  });
+
+  document.getElementById('file-input').addEventListener('change', function() {
+    if (this.files[0]) showFileName(this.files[0].name);
+  });
+
+  function showFileName(name) {
+    const fn = document.getElementById('file-name');
+    fn.textContent = '📄 ' + name;
+    fn.style.display = 'block';
+    document.getElementById('f-file').classList.remove('has-error');
+  }
+
+  async function submitForm() {
+    let valid = true;
+
+    const name = document.getElementById('name').value.trim();
+    document.getElementById('f-name').classList.toggle('has-error', !name);
+    if (!name) valid = false;
+
+    const grade = document.querySelector('input[name="grade"]:checked');
+    document.getElementById('f-grade').classList.toggle('has-error-radio', !grade);
+    if (!grade) valid = false;
+
+    const univ = document.getElementById('univ').value.trim();
+    document.getElementById('f-univ').classList.toggle('has-error', !univ);
+    if (!univ) valid = false;
+
+    const email = document.getElementById('email').value.trim();
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    document.getElementById('f-email').classList.toggle('has-error', !emailOk);
+    if (!emailOk) valid = false;
+
+    const venue = document.querySelector('input[name="venue"]:checked');
+    document.getElementById('f-venue').classList.toggle('has-error-radio', !venue);
+    if (!venue) valid = false;
+
+    const fileInput = document.getElementById('file-input');
+    const file = fileInput.files[0];
+    document.getElementById('f-file').classList.toggle('has-error', !file);
+    if (!file) valid = false;
+
+    if (!valid) {
+      const firstError = document.querySelector('.has-error, .has-error-radio');
+      if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    // ローディング開始
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.classList.add('sending');
+
+    try {
+      // ファイルをBase64変換
+      const fileBase64 = await toBase64(file);
+
+      const payload = {
+        name,
+        grade: grade.value,
+        university: univ,
+        email,
+        venue: venue.value,
+        fileName: file.name,
+        fileType: file.type,
+        fileData: fileBase64,
+        timestamp: new Date().toLocaleString('ja-JP')
+      };
+
+      // GASへ送信
+      const res = await fetch(SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify(payload)
+      });
+
+      const result = await res.json();
+
+      if (result.status === "success") {
+        document.getElementById('form-body').style.display = 'none';
+        document.getElementById('success-box').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        throw new Error(result.message || "エラーが発生しました");
+      }
+    } catch (e) {
+      alert("送信に失敗しました。\n" + e.message + "\n\nSCRIPT_URLの設定を確認してください。");
+      btn.disabled = false;
+      btn.classList.remove('sending');
+    }
+  }
+
+  function toBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+</script>
+</body>
+</html>
